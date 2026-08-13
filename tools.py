@@ -33,3 +33,4 @@ def askDBCreds() -> Database | None:
     except:
         # Return None if the input was cancelled or failed
         return None
+
