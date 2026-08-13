@@ -21,7 +21,6 @@ firstMenu.py          # Database connection menu (new / saved DB)
 tools.py              # Input validators and credential prompt helpers
 DB.py                 # Database class: URL building, JSON saving, connectivity test
 databaseStructure.py  # SQLAlchemy models (User, Exercise)
-test.py               # REPL demo / playground script
 ```
 
 ## Setup
