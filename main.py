@@ -23,13 +23,13 @@ def main(console: Console, json_file: str):
     COMMANDS: dict[str, Callable] = {
         "Connect to a new database" : fM.connectToNewDB,
         "Connect to a saved database" : fM.connectToSavedDB,
-        "Configure a database" : fM.configureDB,
+        "Recreate database schema" : fM.recreateDBSchema,
         "exit" : fM.quit
     }
     while True:
         asking = quest.select(
             "Select an option :",
-            choices=["Connect to a new database", "Connect to a saved databse", "Configure a database", "exit"]
+            choices=[key for key in COMMANDS]
             ).unsafe_ask()
 
         COMMANDS[asking](console, json_file)

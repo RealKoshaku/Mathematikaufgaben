@@ -1,7 +1,8 @@
-# Import of questionary for interactive input prompts
 import questionary as quest
-# Import of the Database class defined in DB.py
 from DB import Database
+from rich.table import Table
+from rich.console import Console
+from sqlalchemy import Engine, MetaData, create_engine
 
 def verifyText(text: str) -> str | bool:
     """Return an error message if the text is empty, True otherwise."""
@@ -30,7 +31,30 @@ def askDBCreds() -> Database | None:
         ).unsafe_ask()
         # Build a Database object from the form responses
         return Database(tuple(responses.values()))
-    except:
+    except (KeyboardInterrupt, EOFError):
         # Return None if the input was cancelled or failed
         return None
 
+def createATableFromTablesInDB(console: Console, db : Database) -> Table:
+    engine: Engine = create_engine(db.makePostgresqlURL())
+    metadata: MetaData = MetaData()
+    metadata.reflect(bind=engine)
+    
+    tablesFound: list = list(metadata.tables.keys())
+    table = Table(title=f"Tables found in {db.dbName}")
+    
+    table.add_column("ID", style="cyan")
+    table.add_column("Table", style="red", justify="center")
+    
+    for i, key in enumerate(tablesFound):
+        table.add_row(str(i), key)
+
+    engine.dispose()
+
+    return table
+
+def askSaveDBToJSON(console: Console, db: Database, json_file: str) -> None:
+    ok = quest.confirm("Do you want to save this DB in the JSON ?", default = True).ask()
+    if ok:
+        db.saveDBToJSON(json_file)
+        console.print("[bold green]Success ! Credentials saved to JSON.[/]\n")

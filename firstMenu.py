@@ -4,11 +4,10 @@ import tools as t
 from rich.console import Console
 from rich.table import Table
 
-from sqlalchemy import create_engine, Engine, MetaData
+from sqlalchemy import create_engine, Engine
 import questionary as quest
 from DB import Database
 from databaseStructure import Base
-import time
 
 def askDBCredsAndTest(console: Console) -> Database | None:
     # Prompt for credentials until the connection succeeds
@@ -36,10 +35,7 @@ def connectToNewDB(console: Console, json_file: str):
         return None
     else:
         # Offer to save the configuration into the JSON file
-        ok = quest.confirm("Do you want to save this DB in the JSON ?", default = True).ask()
-        if ok:
-            db.saveDBToJSON(json_file)
-            console.print("[bold green]Success ! Credentials saved to JSON.[/]n")
+        t.askSaveDBToJSON(console, db, json_file)
         # Create then release a SQLAlchemy engine (final validation)
         engine: Engine = create_engine(db.makePostgresqlURL())
         engine.dispose()
@@ -49,47 +45,53 @@ def connectToSavedDB(json_file: str) -> None:
     # TODO: read a saved configuration from the JSON and connect to it
     pass
 
-def configureDB(console: Console, json_file: str) -> None:
-    """Initialize the database schema using the given connection URL."""
+def recreateDBSchema(console: Console, json_file: str) -> Database | None:
+    """Recreate the app schema: drop all app tables, recreate them, optionally save."""
+    # Ask for credentials and test the connection (cancel -> abort)
     db: Database | None = askDBCredsAndTest(console)
     if db is None:
-        console.print("[bold red] Please enter data[/]")
+        console.print("[bold red]No data entered. Operation cancelled.[/]\n")
         return None
-    else:
-        engine: Engine = create_engine(db.makePostgresqlURL())
-        metadata: MetaData = MetaData()
-        metadata.reflect(bind=engine)
 
-        tablesFound: list = list(metadata.tables.keys())
-        table = Table(title=f"Tables found in {db.dbName}")
+    engine: Engine = create_engine(db.makePostgresqlURL())
+    try:
+        # Show the current tables before anything destructive
+        console.print(t.createATableFromTablesInDB(console, db))
 
-        table.add_column("ID", style="cyan")
-        table.add_column("Table", style="red", justify="center")
-
-        for i, key in enumerate(tablesFound):
-            table.add_row(str(i), key)
-
-        console.print(table)
-
-        ok = quest.confirm("This action will erase all the tables in the DB. Sure you want to delete all the tables ?", default=True).ask()
-        if ok:
-            with console.status("Erasing all the tables...", spinner="dots"):
-                metadata.drop_all(bind=engine)
-                time.sleep(0.5)
-            console.print("[bold green] Success ! All tables were erased.")
-            with console.status("Creating the new tables...", spinner="dots"):
-                Base.metadata.create_all(engine)
-                time.sleep(0.5)
-            console.print("[bold green]Success ! All new tables were created.[/]\n")
-        else:
-            console.print("[bold red] Operation cancelled by user.[/]\n")
+        # Confirm BEFORE touching the DB, naming the target database
+        ok = quest.confirm(
+            f"This action will erase all the tables in '{db.dbName}'. "
+            "Are you sure you want to delete all the tables ?",
+            default=True,
+        ).ask()
+        print("")
+        if not ok:
+            console.print("[bold red]Operation cancelled by user.[/]\n")
             return None
-        engine.dispose()
 
-        ok = quest.confirm("Do you want to save this DB in the JSON ?", default = True).ask()
+        # Drop only this app's tables (not the whole schema)
+        with console.status("Erasing all the tables...", spinner="dots"):
+            Base.metadata.drop_all(engine)
+        console.print("[bold green]Success ! All tables were erased.[/]\n")
+
+        # Recreate the app tables
+        with console.status("Creating the new tables...", spinner="dots"):
+            Base.metadata.create_all(engine)
+        console.print("[bold green]Success ! All new tables were created.[/]\n")
+
+        # Optionally save the credentials
+        t.askSaveDBToJSON(console, db, json_file)
+        
+        ok = quest.confirm("Do you want to enter in this DB", default=True).ask()
         if ok:
-            db.saveDBToJSON(json_file)
-            console.print("[bold green]Success ! Credentials saved to JSON.[/]n")
+            pass
+
+        return db
+    except Exception as e:
+        console.print(f"[bold red]Error while configuring the DB : {e}[/]\n")
+        return None
+    finally:
+        engine.dispose()
 
 def quit():
     # TODO: implement a clean exit from the application
