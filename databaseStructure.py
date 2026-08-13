@@ -6,7 +6,6 @@ import uuid
 # Import of SQLAlchemy column types
 from sqlalchemy import (
     Boolean,
-    CheckConstraint,
     DateTime,
     ForeignKey,
     Integer,

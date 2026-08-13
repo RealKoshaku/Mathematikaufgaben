@@ -16,14 +16,14 @@ def askDBCredsAndTest(console: Console) -> Database | None:
                 return None
             # Test the connection and inform the user of the result
             if db.isConnectable()[0]:
-                console.print("[bold green]Sucess ! Connection test passed.[/]\n")
+                console.print("[bold green]success ! Connection test passed.[/]\n")
                 return db
             console.print("[bold red] Fail ! Connection test failed : Invalid data entered.[/]\n")
         except KeyboardInterrupt:
             # Keyboard interruption (Ctrl+C): stop
             return None
 
-def initializeDB(DB_CREDS: str, console: Console) -> None:
+def configureDB(db: Database, console: Console, json_file: str) -> None:
     """Initialize the database schema using the given connection URL."""
     # TODO: initialize the database schema using the provided credentials
     pass
@@ -39,13 +39,13 @@ def connectToNewDB(console: Console, json_file: str):
         ok = quest.confirm("Do you want to save this DB in the JSON ?", default = True).ask()
         if ok:
             db.saveDBToJSON(json_file)
-            console.print("Sucess ! Credentials saved to JSON.")
+            console.print("success ! Credentials saved to JSON.")
         # Create then release a SQLAlchemy engine (final validation)
         engine: Engine = create_engine(db.makePostgresqlURL())
         engine.dispose()
 
 
-def connectToSavedDB() -> None:
+def connectToSavedDB(json_file: str) -> None:
     """Connect to a previously saved database configuration."""
     # TODO: read a saved configuration from the JSON and connect to it
     pass
@@ -53,6 +53,3 @@ def connectToSavedDB() -> None:
 def quit():
     # TODO: implement a clean exit from the application
     pass
-
-# Entry point: connect to a new database using the Rich console
-connectToNewDB(Console(), 'savedDB.json')

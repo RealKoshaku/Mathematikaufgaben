@@ -26,7 +26,7 @@ def askDBCreds() -> Database | None:
             dbHost = quest.text("Host of the DB :", validate=verifyText),
             dbPort = quest.text("Port of the DB :", default="5432", validate=verifyInt),
             dbAdmin = quest.text("Admin of the DB :", validate=verifyText),
-            dbPassword = quest.text("Password of the DB :", validate=verifyText)
+            dbPassword = quest.password("Password of the DB :", validate=verifyText)
         ).unsafe_ask()
         # Build a Database object from the form responses
         return Database(tuple(responses.values()))
