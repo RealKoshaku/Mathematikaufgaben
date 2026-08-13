@@ -1,5 +1,5 @@
 # Import of Python standard library modules
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 import uuid
 
@@ -30,10 +30,6 @@ class User(Base):
         Uuid, primary_key=True, default=uuid.uuid4
     )
 
-    # Login credentials: email and username (both unique)
-    email: Mapped[str] = mapped_column(
-        String(255), unique=True, index=True, nullable=False
-    )
     username: Mapped[str] = mapped_column(
         String(50), unique=True, index=True, nullable=False
     )
@@ -92,11 +88,10 @@ class Exercise(Base):
         String(100), nullable=True
     )
 
-    # School level (indexed) and difficulty between 1 and 5
+    # School level (indexed)
     level: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     difficulty: Mapped[int] = mapped_column(
         Integer,
-        CheckConstraint("difficulty >= 1 AND difficulty <= 5"),
         nullable=False,
     )
 

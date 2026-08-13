@@ -1,6 +1,5 @@
 # Import of questionary for interactive input prompts
 import questionary as quest
-from questionary import Form
 # Import of the Database class defined in DB.py
 from DB import Database
 

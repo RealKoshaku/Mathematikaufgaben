@@ -13,9 +13,12 @@ class Database():
         # If no credentials are provided, no object is created (None)
         if DB_CREDS is None:
             return None
-        return super.__new__(cls)
+        return super().__new__(cls)
     
-    def __init__(self, DB_CREDS: tuple[str, ...]):
+    def __init__(self, DB_CREDS: tuple[str, ...] | None):
+        # None can never reach this point because __new__ guards it
+        if DB_CREDS is None:
+            raise ValueError("DB_CREDS cannot be None")
         # Unpack the credentials tuple into dedicated attributes
         self.dbName = DB_CREDS[0]
         self.dbHost = DB_CREDS[1]
@@ -32,12 +35,10 @@ class Database():
         path = Path(json_file)
 
         # If the file already exists and is not empty, load its contents
+        data: dict[str, dict[str, str]] = {}
         if path.exists() and path.stat().st_size > 0:
             with open(path, 'r', encoding="utf-8") as f:
                 data = json.load(f)
-        else:
-            # Otherwise start from an empty dictionary
-            data = {}
 
         # Add the current database with an incremental numeric key
         data[str(len(data))] = dict(dbName = self.dbName, dbHost = self.dbHost, dbPort = self.dbPort)
