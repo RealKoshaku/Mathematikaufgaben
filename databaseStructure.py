@@ -1,9 +1,9 @@
-# Import des modules Python standard
+# Import of Python standard library modules
 from datetime import datetime, timezone
 from typing import List, Optional
 import uuid
 
-# Import des types de colonnes SQLAlchemy
+# Import of SQLAlchemy column types
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -30,7 +30,7 @@ class User(Base):
         Uuid, primary_key=True, default=uuid.uuid4
     )
 
-    # Identifiants de connexion : email et nom d'utilisateur (uniques)
+    # Login credentials: email and username (both unique)
     email: Mapped[str] = mapped_column(
         String(255), unique=True, index=True, nullable=False
     )
@@ -38,19 +38,19 @@ class User(Base):
         String(50), unique=True, index=True, nullable=False
     )
 
-    # Mot de passe haché (jamais stocké en clair)
+    # Hashed password (never stored in plain text)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    # Informations personnelles de l'utilisateur
+    # Personal information about the user
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    # Drapeau indiquant si l'utilisateur a les droits administrateur
+    # Flag indicating whether the user has administrator rights
     is_admin: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
 
-    # Horodatage de création et de dernière modification
+    # Creation and last-update timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -61,8 +61,8 @@ class User(Base):
         nullable=False,
     )
 
-    # Relation : un utilisateur peut créer plusieurs exercices.
-    # "cascade=all, delete-orphan" supprime ses exercices avec lui.
+    # Relationship: one user can create many exercises.
+    # "cascade=all, delete-orphan" deletes their exercises along with the user.
     exercises: Mapped[List["Exercise"]] = relationship(
         "Exercise", back_populates="author", cascade="all, delete-orphan"
     )
@@ -81,10 +81,10 @@ class Exercise(Base):
         Uuid, primary_key=True, default=uuid.uuid4
     )
 
-    # Titre de l'exercice
+    # Exercise title
     title: Mapped[str] = mapped_column(String(255), nullable=False)
 
-    # Matière principale (indexée) et matière secondaire optionnelle
+    # Main subject (indexed) and optional secondary subject
     principal_subject: Mapped[str] = mapped_column(
         String(100), index=True, nullable=False
     )
@@ -92,7 +92,7 @@ class Exercise(Base):
         String(100), nullable=True
     )
 
-    # Niveau scolaire (indexé) et difficulté comprise entre 1 et 5
+    # School level (indexed) and difficulty between 1 and 5
     level: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     difficulty: Mapped[int] = mapped_column(
         Integer,
@@ -100,16 +100,16 @@ class Exercise(Base):
         nullable=False,
     )
 
-    # Chemin vers le fichier de l'exercice (unique)
+    # Path to the exercise file (unique)
     path_to_file: Mapped[str] = mapped_column(
         String(512), unique=True, nullable=False
     )
 
-    # Clé étrangère vers le créateur de l'exercice
+    # Foreign key pointing to the creator of the exercise
     created_by: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    # Horodatage de création et de dernière modification
+    # Creation and last-update timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -120,13 +120,13 @@ class Exercise(Base):
         nullable=False,
     )
 
-    # Commentaire facultatif sur l'exercice
+    # Optional comment on the exercise
     comment: Mapped[Optional[str]] = mapped_column(
         String(1024),
         nullable = True
     )
 
-    # Relation inverse : l'auteur (utilisateur) de l'exercice
+    # Inverse relationship: the author (user) of the exercise
     author: Mapped["User"] = relationship("User", back_populates="exercises")
 
     def __repr__(self) -> str:

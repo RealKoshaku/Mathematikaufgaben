@@ -1,19 +1,19 @@
-# Import de questionary pour les invites de saisie interactives
+# Import of questionary for interactive input prompts
 import questionary as quest
 from questionary import Form
-# Import de la classe Database définie dans DB.py
+# Import of the Database class defined in DB.py
 from DB import Database
 
 def verifyText(text: str) -> str | bool:
     """Return an error message if the text is empty, True otherwise."""
-    # Renvoie un message d'erreur si la saisie est vide ou ne contient que des espaces
+    # Return an error message if the input is empty or whitespace-only
     if not text or not text.strip():
         return "Complete this field please."
     return True
 
 def verifyInt(text: str) -> str | bool:
     """Return an error message if the text is not an integer, True otherwise."""
-    # Renvoie un message d'erreur si la saisie n'est pas un nombre entier
+    # Return an error message if the input is not an integer
     if not text or not text.strip().isdigit():
         return "Please enter an integer number."
     return True
@@ -21,7 +21,7 @@ def verifyInt(text: str) -> str | bool:
 def askDBCreds() -> Database | None:
     """Prompt the user for database credentials and return them as a tuple."""
     try:
-        # Affiche un formulaire interactif pour saisir les identifiants de la base
+        # Display an interactive form to collect the database credentials
         responses = quest.form(
             dbName = quest.text("Name of the DB :", validate=verifyText),
             dbHost = quest.text("Host of the DB :", validate=verifyText),
@@ -29,8 +29,8 @@ def askDBCreds() -> Database | None:
             dbAdmin = quest.text("Admin of the DB :", validate=verifyText),
             dbPassword = quest.text("Password of the DB :", validate=verifyText)
         ).unsafe_ask()
-        # Construit un objet Database à partir des réponses du formulaire
+        # Build a Database object from the form responses
         return Database(tuple(responses.values()))
     except:
-        # Retourne None en cas d'annulation ou d'erreur de saisie
+        # Return None if the input was cancelled or failed
         return None
