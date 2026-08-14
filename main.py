@@ -20,18 +20,22 @@ def banner(console: Console) -> None:
 
 def main(console: Console, json_file: str):
     """Entry point: print the banner and run the main application loop."""
+    # Map each menu label to the function handling it
     COMMANDS: dict[str, Callable] = {
         "Connect to a new database" : fM.connectToNewDB,
         "Connect to a saved database" : fM.connectToSavedDB,
         "Recreate database schema" : fM.recreateDBSchema,
         "exit" : fM.quit
     }
+    # Loop forever so the user can keep choosing actions
     while True:
+        # Let the user pick one of the available commands
         asking = quest.select(
             "Select an option :",
             choices=[key for key in COMMANDS]
             ).unsafe_ask()
 
+        # Run the function associated with the chosen command
         COMMANDS[asking](console, json_file)
         
 

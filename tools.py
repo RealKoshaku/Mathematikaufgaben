@@ -36,16 +36,21 @@ def askDBCreds() -> Database | None:
         return None
 
 def createATableFromTablesInDB(console: Console, db : Database) -> Table:
+    """Build a Rich table listing all tables currently present in the database."""
+    # Create an engine and introspect the database schema
     engine: Engine = create_engine(db.makePostgresqlURL())
     metadata: MetaData = MetaData()
     metadata.reflect(bind=engine)
-    
+
+    # Collect the names of all existing tables
     tablesFound: list = list(metadata.tables.keys())
     table = Table(title=f"Tables found in {db.dbName}")
-    
+
+    # Add an ID column and the table name column
     table.add_column("ID", style="cyan")
     table.add_column("Table", style="red", justify="center")
-    
+
+    # Fill the table with one row per existing table
     for i, key in enumerate(tablesFound):
         table.add_row(str(i), key)
 
@@ -54,6 +59,8 @@ def createATableFromTablesInDB(console: Console, db : Database) -> Table:
     return table
 
 def askSaveDBToJSON(console: Console, db: Database, json_file: str) -> None:
+    """Ask the user whether to save the database credentials into a JSON file."""
+    # Only save if the user confirms
     ok = quest.confirm("Do you want to save this DB in the JSON ?", default = True).ask()
     if ok:
         db.saveDBToJSON(json_file)

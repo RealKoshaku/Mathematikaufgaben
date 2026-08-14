@@ -10,6 +10,7 @@ class Database():
     """Manages a PostgreSQL connection based on its credentials."""
 
     def __new__(cls, DB_CREDS: tuple[str, ...] | None):
+        """Return None when no credentials are given, otherwise a new instance."""
         # If no credentials are provided, no object is created (None)
         if DB_CREDS is None:
             return None
@@ -27,10 +28,12 @@ class Database():
         self.dbPassword = DB_CREDS[4]
 
     def makePostgresqlURL(self) -> str:
+        """Return the PostgreSQL connection URL built from the credentials."""
         # Build the PostgreSQL connection URL from the attributes
         return f"postgresql://{self.dbAdmin}:{self.dbPassword}@{self.dbHost}:{self.dbPort}/{self.dbName}"
 
     def saveDBToJSON(self, json_file: str) -> None:
+        """Persist the database credentials into the given JSON file."""
         # Save the database information into a JSON file
         path = Path(json_file)
 
@@ -48,6 +51,7 @@ class Database():
             json.dump(data, f, indent=4)
 
     def isConnectable(self, showError: bool = False) -> tuple[bool, OperationalError | None]:
+        """Return (True, None) if the DB is reachable, else (False, error)."""
         # Test whether the database is reachable by running a simple query
         engine = create_engine(self.makePostgresqlURL())
         try:

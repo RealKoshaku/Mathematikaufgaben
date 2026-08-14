@@ -10,6 +10,7 @@ from DB import Database
 from databaseStructure import Base
 
 def askDBCredsAndTest(console: Console) -> Database | None:
+    """Prompt for credentials until the connection succeeds, or None on cancel."""
     # Prompt for credentials until the connection succeeds
     while True:
         try:
@@ -94,5 +95,6 @@ def recreateDBSchema(console: Console, json_file: str) -> Database | None:
         engine.dispose()
 
 def quit():
+    """Exit the application cleanly."""
     # TODO: implement a clean exit from the application
     pass
