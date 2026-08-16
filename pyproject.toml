@@ -4,3 +4,7 @@ plugins = [
     "sqlalchemy.ext.mypy.plugin"
 ]
 ignore_missing_imports = true
+
+[tool.ruff.lint]
+# Blind except handlers are deliberate in this CLI (defensive error reporting)
+ignore = ["BLE001"]

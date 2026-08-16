@@ -1,8 +1,10 @@
 import questionary as quest
-from DB import Database
-from rich.table import Table
 from rich.console import Console
+from rich.table import Table
 from sqlalchemy import Engine, MetaData, create_engine
+
+from DB import Database
+
 
 def verifyText(text: str) -> str | bool:
     """Return an error message if the text is empty, True otherwise."""

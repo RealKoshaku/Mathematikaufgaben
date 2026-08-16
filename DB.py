@@ -1,12 +1,15 @@
 # Import of standard library modules for reading/writing JSON files
 import json
 from pathlib import Path
+
 # Import of SQLAlchemy to create the connection engine and run raw SQL
 from sqlalchemy import create_engine, text
-# Import of the exception raised when the database connection fails
-from sqlalchemy.exc import OperationalError
 
-class Database():
+# Import of the exceptions raised on connection or DBAPI errors
+from sqlalchemy.exc import OperationalError, SQLAlchemyError
+
+
+class Database:
     """Manages a PostgreSQL connection based on its credentials."""
 
     def __new__(cls, DB_CREDS: tuple[str, ...] | None):
@@ -44,13 +47,13 @@ class Database():
                 data = json.load(f)
 
         # Add the current database with an incremental numeric key
-        data[str(len(data))] = dict(dbName = self.dbName, dbHost = self.dbHost, dbPort = self.dbPort)
+        data[str(len(data))] = {"dbName": self.dbName, "dbHost": self.dbHost, "dbPort": self.dbPort}
 
         # Rewrite the updated dictionary into the JSON file
         with open(json_file, 'w', encoding="utf-8") as f:
             json.dump(data, f, indent=4)
 
-    def isConnectable(self, showError: bool = False) -> tuple[bool, OperationalError | None]:
+    def isConnectable(self, showError: bool = False) -> tuple[bool, Exception | None]:
         """Return (True, None) if the DB is reachable, else (False, error)."""
         # Test whether the database is reachable by running a simple query
         engine = create_engine(self.makePostgresqlURL())
@@ -59,8 +62,13 @@ class Database():
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1;"))
             return (True, None)
-        except OperationalError as e:
+        except (OperationalError, SQLAlchemyError) as e:
             # On error, return the exception if the flag is enabled
+            if showError:
+                return (False, e)
+            return (False, None)
+        except Exception as e:
+            # Covers DBAPI driver issues (e.g. missing psycopg2) and the like
             if showError:
                 return (False, e)
             return (False, None)

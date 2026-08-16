@@ -4,7 +4,6 @@ from sqlalchemy.exc import OperationalError
 
 from DB import Database
 
-
 FAKE_CREDS = ("myapp", "localhost", "5432", "admin", "secret")
 
 

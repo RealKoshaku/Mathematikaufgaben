@@ -1,7 +1,6 @@
 # Import of Python standard library modules
-from datetime import datetime
-from typing import List, Optional
 import uuid
+from datetime import datetime
 
 # Import of SQLAlchemy column types
 from sqlalchemy import (
@@ -58,7 +57,7 @@ class User(Base):
 
     # Relationship: one user can create many exercises.
     # "cascade=all, delete-orphan" deletes their exercises along with the user.
-    exercises: Mapped[List["Exercise"]] = relationship(
+    exercises: Mapped[list["Exercise"]] = relationship(
         "Exercise", back_populates="author", cascade="all, delete-orphan"
     )
 
@@ -83,7 +82,7 @@ class Exercise(Base):
     principal_subject: Mapped[str] = mapped_column(
         String(100), index=True, nullable=False
     )
-    second_subject: Mapped[Optional[str]] = mapped_column(
+    second_subject: Mapped[str | None] = mapped_column(
         String(100), nullable=True
     )
 
@@ -115,7 +114,7 @@ class Exercise(Base):
     )
 
     # Optional comment on the exercise
-    comment: Mapped[Optional[str]] = mapped_column(
+    comment: Mapped[str | None] = mapped_column(
         String(1024),
         nullable = True
     )

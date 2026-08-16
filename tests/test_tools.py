@@ -1,5 +1,3 @@
-import pytest
-
 import tools
 from DB import Database
 
@@ -70,8 +68,9 @@ def test_create_table_from_tables_in_db(monkeypatch, tmp_path):
     db = Database(("myapp", "localhost", "5432", "admin", "secret"))
     assert db is not None
 
-    from rich.console import Console
     from io import StringIO
+
+    from rich.console import Console
 
     console = Console(file=StringIO())
     table = tools.createATableFromTablesInDB(console, db)
